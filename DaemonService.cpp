@@ -35,6 +35,7 @@ int main(int argc, char **argv)
 	FILE *in = fopen(FILE_LOCATION, "r");
 	char linebuf[256];
 	char *args[8];
+	pid_t id;
 
 	while (fgets(linebuf, 256, in) != NULL)
 	{
@@ -43,12 +44,51 @@ int main(int argc, char **argv)
 		printf("fork id = %d\n", ret);
 
 		const char *delim = " ";
-		char *buf = linebuf;
-		strtok(buf, delim);
 
-		args[0] = strchr(buf,'/')+1;
-		if(ret ==0){
+		int i = 1;
+		args[0] = strtok(linebuf, delim);
+
+		while (args[i++] = strtok(NULL, delim))
+		{
+			printf("%s\n", args[i - 1]);
+		}
+
+		if (ret == 0)
+		{
 			execvp(linebuf, args);
+			exit(errno);
+		}
+		if (ret > 0)
+		{
+			id = ret;
+		}
+	}
+
+	while (1)
+	{
+		pid_t pid = waitpid(-1, NULL, 0);
+		printf("%d\n", id);
+		if (pid == -1)
+		{
+			continue;
+		}
+
+		int i;
+		bool foundApp = false;
+
+		if (id == pid)
+		{
+			int ret = fork();
+			if (ret == 0)
+			{
+				execvp(linebuf, args);
+				exit(errno);
+			}
+
+			if (ret > 0)
+			{
+				id = ret;
+			}
 		}
 	}
 }
