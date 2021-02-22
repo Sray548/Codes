@@ -21,7 +21,8 @@
 #include <string.h>
 #include <sys/wait.h>
 
-
+#include "DynArray.h"
+#include "WLogger.h"
 
 #define FILE_LOCATION "daemonlist"
 
@@ -34,63 +35,64 @@ struct ExecArgs
 
 int main(int argc, char **argv)
 {
+	TDynArray<struct ExecArgs> cmdlist;
 	FILE *in = fopen(FILE_LOCATION, "r");
 	char linebuf[256];
 	char *args[8];
 	pid_t id;
 
-	while (fgets(linebuf, 256, in) != NULL)
-	{
-		// printf(linebuf);
-		int ret = fork();
-		printf("fork id = %d\n", ret);
+	// while (fgets(linebuf, 256, in) != NULL)
+	// {
+	// 	// printf(linebuf);
+	// 	int ret = fork();
+	// 	printf("fork id = %d\n", ret);
 
-		const char *delim = " ";
+	// 	const char *delim = " ";
 
-		int i = 1;
-		args[0] = strtok(linebuf, delim);
+	// 	int i = 1;
+	// 	args[0] = strtok(linebuf, delim);
 
-		while (args[i++] = strtok(NULL, delim))
-		{
-			printf("%s\n", args[i - 1]);
-		}
+	// 	while (args[i++] = strtok(NULL, delim))
+	// 	{
+	// 		printf("%s\n", args[i - 1]);
+	// 	}
 
-		if (ret == 0)
-		{
-			execvp(linebuf, args);
-			exit(errno);
-		}
-		if (ret > 0)
-		{
-			id = ret;
-		}
-	}
+	// 	if (ret == 0)
+	// 	{
+	// 		execvp(linebuf, args);
+	// 		exit(errno);
+	// 	}
+	// 	if (ret > 0)
+	// 	{
+	// 		id = ret;
+	// 	}
+	// }
 
-	while (1)
-	{
-		pid_t pid = waitpid(-1, NULL, 0);
-		printf("%d\n", id);
-		if (pid == -1)
-		{
-			continue;
-		}
+	// while (1)
+	// {
+	// 	pid_t pid = waitpid(-1, NULL, 0);
+	// 	printf("%d\n", id);
+	// 	if (pid == -1)
+	// 	{
+	// 		continue;
+	// 	}
 
-		int i;
-		bool foundApp = false;
+	// 	int i;
+	// 	bool foundApp = false;
 
-		if (id == pid)
-		{
-			int ret = fork();
-			if (ret == 0)
-			{
-				execvp(linebuf, args);
-				exit(errno);
-			}
+	// 	if (id == pid)
+	// 	{
+	// 		int ret = fork();
+	// 		if (ret == 0)
+	// 		{
+	// 			execvp(linebuf, args);
+	// 			exit(errno);
+	// 		}
 
-			if (ret > 0)
-			{
-				id = ret;
-			}
-		}
-	}
+	// 		if (ret > 0)
+	// 		{
+	// 			id = ret;
+	// 		}
+	// 	}
+	// }
 }
