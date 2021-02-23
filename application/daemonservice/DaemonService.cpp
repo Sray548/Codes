@@ -25,6 +25,7 @@
 #include "WLogger.h"
 
 #define FILE_LOCATION "daemonlist"
+static WLogger *myLog = wlogGetInit("DaemonService", WLOGLEVEL_DEBUG);
 
 struct ExecArgs
 {
@@ -33,66 +34,111 @@ struct ExecArgs
 	char *args[8];
 };
 
+int parserArgs(struct ExecArgs *cmd)
+{
+	const char *delim = " ";
+	char *buf = cmd->linebuf;
+	int i = 1;
+	strtok(buf, delim);
+	cmd->id = -1;
+	cmd->args[0] = strrchr(buf, '/') + 1;
+	while ((cmd->args[i++] = strtok(NULL, delim)))
+	{
+		printf("%s\n", cmd->args[i - 1]);
+		WLOGD(myLog, "%d %s", i - 1, cmd->args[i - 1]);
+	}
+	return 1;
+}
+
 int main(int argc, char **argv)
 {
 	TDynArray<struct ExecArgs> cmdlist;
 	FILE *in = fopen(FILE_LOCATION, "r");
-	char linebuf[256];
-	char *args[8];
-	pid_t id;
 
-	// while (fgets(linebuf, 256, in) != NULL)
-	// {
-	// 	// printf(linebuf);
-	// 	int ret = fork();
-	// 	printf("fork id = %d\n", ret);
+	WLOGD(myLog, "%s", FILE_LOCATION);
 
-	// 	const char *delim = " ";
+	while (true)
+	{
+		struct ExecArgs *cmd = new (struct ExecArgs);
 
-	// 	int i = 1;
-	// 	args[0] = strtok(linebuf, delim);
+		char *p = fgets(cmd->linebuf, 256, in);
+		if (p)
+		{
+			if (p[0] == '#')
+			{
+				//skip #line comment
+				continue;
+			}
+			p[strlen(p) - 1] = '\0';
+			if (parserArgs(cmd))
+			{
+				cmdlist.push_back(*cmd);
+			}
+		}
+		else
+		{
+			break;
+		}
+	}
 
-	// 	while (args[i++] = strtok(NULL, delim))
-	// 	{
-	// 		printf("%s\n", args[i - 1]);
-	// 	}
+	fclose(in);
 
-	// 	if (ret == 0)
-	// 	{
-	// 		execvp(linebuf, args);
-	// 		exit(errno);
-	// 	}
-	// 	if (ret > 0)
-	// 	{
-	// 		id = ret;
-	// 	}
-	// }
+	for (int i = 0; i < cmdlist.size(); i++)
+	{
+		int ret = fork();
+		if (ret == 0)
+		{
+			execvp(cmdlist[i].linebuf, cmdlist[i].args);
+			exit(errno);
+		}
+		else if (ret < 0)
+		{
+		}
+		else
+		{
+			cmdlist[i].id = ret;
+		}
+	}
 
-	// while (1)
-	// {
-	// 	pid_t pid = waitpid(-1, NULL, 0);
-	// 	printf("%d\n", id);
-	// 	if (pid == -1)
-	// 	{
-	// 		continue;
-	// 	}
+	while (1)
+	{
+		pid_t id = waitpid(-1, NULL, 0);
+		if (id == -1)
+		{
+			continue;
+		}
 
-	// 	int i;
-	// 	bool foundApp = false;
+		int i;
+		bool foundApp = false;
 
-	// 	if (id == pid)
-	// 	{
-	// 		int ret = fork();
-	// 		if (ret == 0)
-	// 		{
-	// 			execvp(linebuf, args);
-	// 			exit(errno);
-	// 		}
+		for (i = 0; i < cmdlist.size(); i++)
+		{
+			if (id == cmdlist[i].id)
+			{
+				foundApp = true;
+				break;
+			}
+		}
 
-	// 		if (ret > 0)
-	// 		{
-	// 			id = ret;
-	// 		}
-	// 	}
-	// }
+		if (foundApp)
+		{
+			int ret = fork();
+			if (ret == 0)
+			{
+				execvp(cmdlist[i].linebuf, cmdlist[i].args);
+				exit(errno);
+			}
+			else if (ret < 0)
+			{
+				/* code */
+			}
+			else
+			{
+				cmdlist[i].id = ret;
+			}
+		}
+		else
+		{
+		}
+	}
 }

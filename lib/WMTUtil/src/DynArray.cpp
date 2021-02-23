@@ -12,14 +12,14 @@
  * OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT OR NON-INFRINGEMENT.
  */
 #include "DynArray.h"
-#include "WAssert.h"
+// #include "WAssert.h"
 #include <stdlib.h>
 #include <string.h>
-#include "debug_new.h"
+// #include "debug_new.h"
 
 DynArray::DynArray(int eleSize)
 {
-	WASSERT(eleSize >= 1)(eleSize);
+	// WASSERT(eleSize >= 1)(eleSize);
 
 	m_eleSize = eleSize;
 	m_data = NULL;
@@ -67,7 +67,7 @@ int DynArray::push_back(void * ele)
 
 int DynArray::insert(int pos, void * ele)
 {
-	WASSERT( pos >= 0 && pos <= m_size)(pos)(m_size);;
+	// WASSERT( pos >= 0 && pos <= m_size)(pos)(m_size);;
 
 	if ( pos < 0 || pos > m_size)
 		return -1;
@@ -86,7 +86,7 @@ int DynArray::insert(int pos, void * ele)
 
 int DynArray::erase(int index)
 {
-	WASSERT( index >= 0 && index < m_size)(index)(m_size);
+	// WASSERT( index >= 0 && index < m_size)(index)(m_size);
 
 	if( index >= 0 && index < m_size)
 	{
@@ -100,13 +100,13 @@ int DynArray::erase(int index)
 
 void * DynArray::operator[](int index)
 {
-	WASSERT( index >= 0 && index < m_size)(index)(m_size);;
+	// WASSERT( index >= 0 && index < m_size)(index)(m_size);;
 	return getElePtr(index);
 }
 
 const void * DynArray::operator[](int index) const
 {
-	WASSERT( index >= 0 && index < m_size)(index)(m_size);;
+	// WASSERT( index >= 0 && index < m_size)(index)(m_size);;
 	return getElePtr(index);
 }
 

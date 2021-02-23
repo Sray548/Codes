@@ -1,20 +1,18 @@
-LIBRARY_DIR = ./src
-INCLUDES = -I./inc
-LIB_NAME = libwmtutil
-SRC = ${LIBRARY_DIR}/DynArray.cpp \
-	  ${LIBRARY_DIR}/debug_new.cpp
 CXX = g++
-LD_FLAGS	=  -fPIC -shared 
-
-HEADER = $(shell find . -name "*.h")
+LIB_NAME = libwmtutil
+SRC = ./src/DynArray.cpp \
+		./src/WLogger.cpp
 OBJ = $(SRC:.cpp=.o)
+LD_FLAGS = -fPIC -shared
+INCLUDES = -I./inc
 
-.PHONY: all clean
-all : $(OBJ)
-	$(CXX)  $(OBJ) -o $(LIB_NAME).so  $(LD_FLAGS)
+$(LIB_NAME):$(OBJ)
+	$(CXX) $(OBJ) -o $(LIB_NAME).so $(LD_FLAGS)
 
 %.o:%.cpp
-	$(CXX) -c $^ $(INCLUDES) -o $@    
+	$(CXX) -c $^ -o $@ $(INCLUDES)
 
+
+.PHONY: clean
 clean:
 	rm -rf $(OBJ) $(LIB_NAME).so
